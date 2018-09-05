@@ -32,12 +32,20 @@ Y_predicted = w * X + b
 
 # Step 5: use the squared error as the loss function
 # you can use either mean squared error or Huber loss
-loss = tf.square(Y - Y_predicted, name='loss')
+# loss = tf.square(Y - Y_predicted, name='loss')
 # loss = utils.huber_loss(Y, Y_predicted)
+
+def huber_loss(labels, predictions, delta = 1.0):
+	residual = tf.abs(labels - predictions)
+	condition = tf.less(residual,delta)
+	small_res = 0.5 * tf.square(residual)
+	large_res = delta * residual - 0.5 * tf.square(delta)
+	return tf.where(condition, small_res, large_res)
+
+loss = huber_loss(Y, Y_predicted, delta = 50.0)
 
 # Step 6: using gradient descent with learning rate of 0.001 to minimize loss
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(loss)
-
 
 start = time.time()
 writer = tf.summary.FileWriter('./graphs/linear_reg', tf.get_default_graph())
